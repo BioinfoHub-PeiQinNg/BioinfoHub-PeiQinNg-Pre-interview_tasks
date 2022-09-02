@@ -1,0 +1,111 @@
+---
+title: "Pre-interview tasks"
+author: "Pei Qin (Sabrina) Ng"
+date: "02/09/2022"
+output: 
+    html_document:
+     toc: TRUE
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+Information about pre-interview tasks:
+
+Task 1: spot-the-error : spot the problem with the provided code and suggest a solution.
+
+Task 2: read and process files, then extract information
+
+
+# Task 1 details
+
+Task instructions:
+
+- a function that looks for a set of names (nam1) or the intersection between that set and another one (nam2) in a table
+
+- variable "nam2" was set to NULL by default in the function parameters as this code is usually used to process a single set of names
+
+- "datatable" is a table with multiple columns, and I just want to output the lines that contain nam1 or the intersection of nam1 and nam2.
+
+Please spot problems with that code, explain the importance, and for a bonus improve the code as you would do it for your own pipeline.
+
+
+```{r}
+fun.lookfornames <- function(nam1, nam2=NULL) {
+  
+  # check that the input names are character
+  checknam <- unique(c(nam1, nam2))
+  if(!is.character(checknam)) warning('The names are not in a character format')
+  
+  commonset <- intersect(nam1, nam2)
+  
+  # find data in the table
+  outdata <- datatable[datatable$ID %in% commonset]
+  
+  return(outdata)
+}
+```
+
+Remarks:
+
+The first problem with the code above is the task which the function is written is conditional. In other words, the input dataset(s) must fulfill first stated criteria to proceed to the next task in the written function (in this case, a checkpoint that checks whether if the input variable is a character vector). The current version of the code did not convey the next-step instructions to exit the loop if the data is a non-character vector, which leads the loop in the function to fail.
+
+The second problem is that the code did not instruct the function to print a human-comprehensible error message "The names are not in a character format"
+
+
+## Solution Task 1 {.tabset}
+
+1. First I load the required packages for the exercise. Then created two small mock datasets, namely mock.table_1 and mock_table 2 to test the function written.
+```{r}
+#load required packages 
+library(dplyr)
+#create a mock datasets and variables required in the loop
+mock.table_1 <- c("a","b","c","d") %>% 
+        as.list() %>% 
+        as.character()
+
+mock.table_2 <- c("a","d") %>% 
+          as.list() %>% 
+        as.character()
+```
+
+
+```{r}
+#generate a datatable with IDs and other information for extraction test
+variable_a <- c("a","d","e","f")
+variable_b <- c(1,2,3,4)
+datatable <- bind_cols(variable_a, variable_b) %>% 
+            rename(ID = "...1", counts = "...2") %>%
+            as.data.frame() 
+
+```
+
+
+
+
+#name matching function
+fun.lookfornames <- function(nam1, nam2) {
+  
+  # check that the input names are character
+  checknam <- unique(c(nam1, nam2))
+  if(!is.character(checknam)){
+      print(warning('The names are not in a character format'))
+  }
+  else {commonset <- intersect(nam1, nam2)
+  
+  # find data in the table
+  outdata <- datatable %>%
+            filter(datatable$ID %in% commonset)
+  
+  return(outdata)}
+  }
+
+
+#test output generation
+out <- fun.lookfornames(mock.table_1, mock.table_2)
+
+
+```
+
+
