@@ -1,7 +1,7 @@
 ---
 title: "Pre-interview tasks"
 author: "Pei Qin (Sabrina) Ng"
-date: "02/09/2022"
+date: "04/09/2022"
 output: 
     html_document:
      toc: TRUE
@@ -17,10 +17,10 @@ Task 1: spot-the-error : spot the problem with the provided code and suggest a s
 
 Task 2: read and process files, then extract information
 
+# Assignments and Solutions {.tabset}
+## Task 1 details 
 
-# Task 1 details
-
-Task instructions:
+ **Task instructions:**
 
 - a function that looks for a set of names (nam1) or the intersection between that set and another one (nam2) in a table
 
@@ -47,7 +47,7 @@ fun.lookfornames <- function(nam1, nam2=NULL) {
 }
 ```
 
-Remarks:
+**Remarks**:
 
 The first problem with the code above is the task which the function is written is conditional. In other words, the input dataset(s) must fulfill first stated criteria to proceed to the next task in the written function (in this case, a checkpoint that checks whether if the input variable is a character vector). The current version of the code did not convey the next-step instructions to exit the loop if the data is a non-character vector, which leads the loop in the function to fail.
 
@@ -57,9 +57,10 @@ The second problem is that the code did not instruct the function to print a hum
 ## Solution Task 1 {.tabset}
 
 1. First I load the required packages for the exercise. Then created two small mock datasets, namely mock.table_1 and mock_table 2 to test the function written.
-```{r}
+```{r, error = FALSE, message = FALSE}
 #load required packages 
 library(dplyr)
+
 #create a mock datasets and variables required in the loop
 mock.table_1 <- c("a","b","c","d") %>% 
         as.list() %>% 
@@ -70,9 +71,11 @@ mock.table_2 <- c("a","d") %>%
         as.character()
 ```
 
+2. Then I generate the datatable as the reference comparison data as stated in the original function. I have included two variables (1) ID - which is what the function extracts, (2) Counts - as an example of metadata columns associated with the IDs.
 
-```{r}
+```{r, warning = FALSE, message = FALSE}
 #generate a datatable with IDs and other information for extraction test
+
 variable_a <- c("a","d","e","f")
 variable_b <- c(1,2,3,4)
 datatable <- bind_cols(variable_a, variable_b) %>% 
@@ -81,9 +84,11 @@ datatable <- bind_cols(variable_a, variable_b) %>%
 
 ```
 
+2. The next step is to include the "if-else" conditions into the loop within the function. I have also included "print" to display the error message if the input name sets were not characters. This can be tested by commenting (using the "#" symbol) away "as.character". 
 
+  _Reminder: remember to remove the last %>% as well._
 
-
+```{r, warning = FALSE, message = FALSE}
 #name matching function
 fun.lookfornames <- function(nam1, nam2) {
   
@@ -101,11 +106,130 @@ fun.lookfornames <- function(nam1, nam2) {
   return(outdata)}
   }
 
-
-#test output generation
-out <- fun.lookfornames(mock.table_1, mock.table_2)
-
-
 ```
 
 
+5. Finally, test run. The output of the test run is stored in the object named "out"
+```{r, warning = FALSE, message = FALSE}
+#test function output generation
+out <- fun.lookfornames(mock.table_1, mock.table_2)
+
+```
+
+This is how the out file looks like. The ouput data is the same as mock.table_2, which consists of only "a" and "d", along with the associated data "counts" that is acquired via the written function.
+
+```{r, error = FALSE, message = FALSE}
+head(out)
+```
+
+## Task 2 details
+
+Write code, adding the checks you find appropriate, to:
+
+1. read the files supplied
+
+2. with them, create a table that looks like:
+
+```{r}
+#       ID                    sample replicate day         data
+#  a100060 SAMPLER1_D10vsD0_hits.csv        R1 D10 3.511875e-08
+#  a100060 SAMPLER1_D10vsD0_hits.csv        R1 D21 1.901825e-07
+#  a100384 SAMPLER1_D10vsD0_hits.csv        R1 D10 1.951042e-08
+#  a100384 SAMPLER1_D10vsD0_hits.csv        R1 D21 2.947829e-07
+#  a100705 SAMPLER1_D10vsD0_hits.csv        R1 D10 4.682500e-08
+#  a100705 SAMPLER1_D10vsD0_hits.csv        R1 D21 2.662556e-07
+
+```
+
+3. From that table, extract the rows of D10 R1 with a value in the column data > 5e-05
+
+
+The datasets which were provided are as follows:
+
+ - SAMPLER1_D10vsD0_hits.csv
+
+ - SAMPLER1_D21vsD0_hits.csv
+
+ - SAMPLER2_D10vsD0_hits.csv
+
+ - SAMPLER2_D21vsD0_hits.csv
+
+ - SAMPLER3_D10vsD0_hits.csv
+
+ - SAMPLER3_D21vsD0_hits.csv
+
+
+**Remarks**:
+
+I noticed there is an issue with the prefix of the file. A quick inspection of the data suggest that the datasets were actually tab seperated variables (tsv). The columns were seperated by "\t" instead of ",". I proceeded the analysis with the prefix of .csv still as this does not impact the code and can be altered later, if required.
+
+## Solution Task 2 
+**Explaination fo the code**:
+
+1) First I loaded all required packages using _library_, then identify for all working files with the prefix ".csv" in my Rproject working directory and stored it as a list in an object called "temp".
+
+2) With a "for" loop, I take in all files stored in the "temp" object, assigning it as individual dataframes.
+
+3) Using the function _rbindlist_, I erged all dataframes together as one, retaining their source ie. file names which provides information of the samples processed.
+
+4) I then remove all quotation marks within the dataframe which may obstruct the downstream analysis then keeping the columns with data required ie. data cleaning. 
+
+5) I then rename the column names to the suggested column names provided, then covert the current dataframe from a wide format to a long format using the function _gather_.
+
+6) I then proceed to split the single column "replicate.day" containing two variables into two individual columns, separating it by the separator ".".
+
+7)The last step was just to reorder the columns in the right order.
+
+```{r, warning = FALSE, message = FALSE}
+#load equired packages 
+library(dplyr)
+library(readr)
+library(data.table)
+library(tidyr)
+library(purrr)
+
+#create a temporarry object to store files to be read ie. files that have the prefix .csv
+temp <- list.files(pattern="*.csv")
+
+
+#read all the tsv files in as individual file objects
+for (i in 1:length(temp)){
+    assign(temp[i], 
+    read_tsv(temp[i],col_names = TRUE,quote=""))
+ }
+
+
+#combine all the dataframes together, keeping the information of the souce of the data
+df <-rbindlist(mget(ls(pattern="*.csv")), 
+          idcol = TRUE, 
+          fill = TRUE)  %>% 
+    mutate(across(everything(),~ map_chr(.x, ~ gsub("\"", "", .x)))) %>% 
+    select(".id","\"ID\"","\"R1.D10\"", "\"R1.D21\"") %>% 
+    rename(Sample = ".id", ID = "\"ID\"", R1.D10 = "\"R1.D10\"",R1.D21 = "\"R1.D21\"" ) %>%     
+    gather(replicate.day,data,"R1.D10": "R1.D21") %>% 
+    separate(replicate.day,into = c("replicate", "day"), sep = "\\.") %>%
+    relocate(ID,.before = Sample)
+    
+```
+The ouput of the code above gives the dataframe as below:
+```{r, echo = FALSE}
+head(df)
+```
+ Now that the datasets were tidied, merged and transformed into the right format,  I filter the dataframe "data" for
+ 
+ 1) the rows of D10 R1 
+ and 
+ 2) with a value in the column data > 5e-05 
+
+then extract the rows which fulfills the listed conditions
+
+
+```{r}
+df_filter <- df %>% 
+            filter(replicate == "R1" & 
+                       day == "D10" &  
+                       data > 5e-05)
+
+head(df_filter)
+```
+There are 881 rows D10 R1 with data > 5e-05
