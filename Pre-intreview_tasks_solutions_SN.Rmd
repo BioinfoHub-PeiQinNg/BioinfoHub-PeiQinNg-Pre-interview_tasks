@@ -201,10 +201,9 @@ for (i in 1:length(temp)){
 
 #combine all the dataframes together, keeping the information of the souce of the data
 df <-rbindlist(mget(ls(pattern="*.csv")), 
-          idcol = TRUE, 
-          fill = TRUE)  %>% 
+          idcol = TRUE, fill = FALSE, use.names=FALSE)  %>% 
     mutate(across(everything(),~ map_chr(.x, ~ gsub("\"", "", .x)))) %>% 
-    select(".id","\"ID\"","\"R1.D10\"", "\"R1.D21\"") %>% 
+    select(1:4) %>% 
     rename(Sample = ".id", ID = "\"ID\"", R1.D10 = "\"R1.D10\"",R1.D21 = "\"R1.D21\"" ) %>%     
     gather(replicate.day,data,"R1.D10": "R1.D21") %>% 
     separate(replicate.day,into = c("replicate", "day"), sep = "\\.") %>%
