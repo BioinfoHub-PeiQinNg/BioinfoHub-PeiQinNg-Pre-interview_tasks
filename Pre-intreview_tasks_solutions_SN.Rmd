@@ -62,7 +62,7 @@ The second problem is that the code did not instruct the function to print a hum
 library(dplyr)
 
 #create a mock datasets and variables required in the loop
-mock.table_1 <- c("a","b","c","d") %>% 
+mock.table_1 <- c("a","b","c","d","e") %>% 
         as.list() %>% 
         as.character()
 
@@ -96,13 +96,15 @@ fun.lookfornames <- function(nam1, nam2) {
   checknam <- unique(c(nam1, nam2))
   if(!is.character(checknam)){
       print(warning('The names are not in a character format'))
-  }
-  else {commonset <- intersect(nam1, nam2)
+  
+      commonset <- intersect(nam1, nam2)
   
   # find data in the table
   outdata <- datatable %>%
-            filter(datatable$ID %in% commonset)
-  
+            filter(datatable$ID %in% commonset)}
+  if(nrow(outdata) == 0){
+      outdata <- datatable %>%
+            filter(datatable$ID %in% nam1)
   return(outdata)}
   }
 
@@ -120,6 +122,47 @@ This is how the out file looks like. The ouput data is the same as mock.table_2,
 
 ```{r, error = FALSE, message = FALSE}
 head(out)
+```
+For nam2 = NULL,
+ 
+```{r,error = FALSE, message = FALSE}
+#name matching function
+fun.lookfornames <- function(nam1, nam2=NULL) {
+  
+  # check that the input names are character
+  checknam <- unique(c(nam1, nam2))
+  if(!is.character(checknam)){
+      print(warning('The names are not in a character format'))
+  
+      commonset <- intersect(nam1, nam2)
+  
+  # find data in the table
+  outdata <- datatable %>%
+            filter(datatable$ID %in% commonset)}
+  if(nrow(outdata) == 0){
+      outdata <- datatable %>%
+            filter(datatable$ID %in% nam1)
+  return(outdata)}
+  }
+
+out2 <-fun.lookfornames(mock.table_1) 
+
+View(out2)
+```
+ 
+This is how the output file looks like
+
+For non-character data, the error message is displayed.
+
+```{r, message = FALSE}
+#create a mock datasets and variables required in the loop
+mock.table_3 <- c("a","b","c","d","e") %>% 
+                as.list() %>%
+                as.double()
+
+out3 <-fun.lookfornames(mock.table_3) 
+
+
 ```
 
 ## Task 2 details
@@ -201,7 +244,7 @@ for (i in 1:length(temp)){
 
 #combine all the dataframes together, keeping the information of the souce of the data
 df <-rbindlist(mget(ls(pattern="*.csv")), 
-          idcol = TRUE, fill = FALSE, use.names=FALSE)  %>% 
+          idcol = TRUE, fill = FALSE, use.names=FALSE)  %>%  #fixed bug issue here
     mutate(across(everything(),~ map_chr(.x, ~ gsub("\"", "", .x)))) %>% 
     select(1:4) %>% 
     rename(Sample = ".id", ID = "\"ID\"", R1.D10 = "\"R1.D10\"",R1.D21 = "\"R1.D21\"" ) %>%     
