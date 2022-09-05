@@ -119,21 +119,20 @@ out <- fun.lookfornames(mock.table_1, mock.table_2)
 
 This is how the out file looks like. The ouput data is the same as mock.table_2, which consists of only "a" and "d", along with the associated data "counts" that is acquired via the written function.
 
-```{r, error = FALSE, message = FALSE}
+```{r, echo = FALSE}
 head(out)
 ```
 For nam2 = NULL,
  
-```{r,error = FALSE, message = FALSE}
+```{r}
 #name matching function
-fun.lookfornames <- function(nam1, nam2=NULL) {
+fun.lookfornames2 <- function(nam1, nam2=NULL) {
   
   # check that the input names are character
   checknam <- unique(c(nam1, nam2))
   if(!is.character(checknam)){
       print(warning('The names are not in a character format'))}
-  
-    else{commonset <- intersect(nam1, nam2)
+ else{commonset <- intersect(nam1, nam2)
   
   # find data in the table
   outdata <- datatable %>%
@@ -143,24 +142,33 @@ fun.lookfornames <- function(nam1, nam2=NULL) {
             filter(datatable$ID %in% nam1)}
   return(outdata)
   }
-out2 <-fun.lookfornames(mock.table_1) 
+out2 <-fun.lookfornames2(mock.table_1) 
 
-View(out2)
+```
+
+```{r, echo = FALSE}
+head(out2)
 ```
  
 This is how the output file looks like
 
 For non-character data, the error message is displayed.
 
-```{r, message = FALSE}
-#create a mock datasets and variables required in the loop
+```{}
+
+#create a mock datasets and variables required in the loop, which is a non-character dataset
 mock.table_3 <- c("a","b","c","d","e") %>% 
                 as.list() %>%
                 as.double()
 
-out3 <-fun.lookfornames(mock.table_3) 
+fun.lookfornames(mock.table_3) 
 
+```
 
+```{r}
+#Warning in print(warning("The names are not in a character format")) :
+  #The names are not in a character format
+#[1] "The names are not in a character format"
 ```
 
 ## Task 2 details
@@ -187,7 +195,7 @@ Write code, adding the checks you find appropriate, to:
 
 The datasets which were provided are as follows:
 
- - SAMPLER1_D10vsD0_hits.csv
+ - SAMPLER1_D10vsD0_hits.csv, 
 
  - SAMPLER1_D21vsD0_hits.csv
 
@@ -251,7 +259,9 @@ df <-rbindlist(mget(ls(pattern="*.csv")),
     relocate(ID,.before = Sample)
     
 ```
-The ouput of the code above gives the dataframe as below:
+
+
+The output of the code above gives the dataframe as below:
 ```{r, echo = FALSE}
 head(df)
 ```
