@@ -89,34 +89,33 @@ datatable <- bind_cols(variable_a, variable_b) %>%
   _Reminder: remember to remove the last %>% as well._
 
 ```{r, warning = FALSE, message = FALSE}
-#name matching function
+ #name matching function
 fun.lookfornames <- function(nam1, nam2) {
   
   # check that the input names are character
   checknam <- unique(c(nam1, nam2))
   if(!is.character(checknam)){
-      print(warning('The names are not in a character format'))
+      print(warning('The names are not in a character format'))}
   
-      commonset <- intersect(nam1, nam2)
+    else{commonset <- intersect(nam1, nam2)
   
   # find data in the table
   outdata <- datatable %>%
             filter(datatable$ID %in% commonset)}
   if(nrow(outdata) == 0){
       outdata <- datatable %>%
-            filter(datatable$ID %in% nam1)
-  return(outdata)}
+            filter(datatable$ID %in% nam1)}
+  return(outdata)
   }
+
+
+out <- fun.lookfornames(mock.table_1, mock.table_2)
 
 ```
 
 
 5. Finally, test run. The output of the test run is stored in the object named "out"
-```{r, warning = FALSE, message = FALSE}
-#test function output generation
-out <- fun.lookfornames(mock.table_1, mock.table_2)
 
-```
 
 This is how the out file looks like. The ouput data is the same as mock.table_2, which consists of only "a" and "d", along with the associated data "counts" that is acquired via the written function.
 
@@ -132,19 +131,18 @@ fun.lookfornames <- function(nam1, nam2=NULL) {
   # check that the input names are character
   checknam <- unique(c(nam1, nam2))
   if(!is.character(checknam)){
-      print(warning('The names are not in a character format'))
+      print(warning('The names are not in a character format'))}
   
-      commonset <- intersect(nam1, nam2)
+    else{commonset <- intersect(nam1, nam2)
   
   # find data in the table
   outdata <- datatable %>%
             filter(datatable$ID %in% commonset)}
   if(nrow(outdata) == 0){
       outdata <- datatable %>%
-            filter(datatable$ID %in% nam1)
-  return(outdata)}
+            filter(datatable$ID %in% nam1)}
+  return(outdata)
   }
-
 out2 <-fun.lookfornames(mock.table_1) 
 
 View(out2)
